@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express from 'express';
-import fileUpload from 'express-fileupload';
 import Mongoose from 'mongoose';
 import { setEnvs } from './libs/set-up.environment';
 // eslint-disable-next-line import/extensions
@@ -16,7 +15,6 @@ app.use(cors());
 // Common middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload());
 /***********************************************************************************
  *                         API routes and error handling
  **********************************************************************************/
@@ -31,7 +29,7 @@ app.use('/api', apiRouter);
 (async () => {
   try {
     console.log(process.env.MONGO_URL);
-    const port = process.env.PORT || 3030;
+    const port = process.env.PORT || 3031;
     await Mongoose.connect(process.env.MONGO_URL || '');
     await app.listen(port, () => console.log(`app is listening on port: ${port}`));
   } catch (e) {

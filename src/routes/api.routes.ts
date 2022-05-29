@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import attachmentRoutes from './attachment.routes';
+import attachmentRoutes from './user.routes';
 // Export the base-router
 const baseRouter = Router();
 // Setup routers
