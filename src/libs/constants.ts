@@ -1,5 +1,8 @@
-export const CONSTANTS = {};
-
+export const CONSTANTS = {
+  REDIS: {
+    SOMETHING: 'cryptos-to-follow',
+  }
+};
 export const ERROR_MESSAGES = {
   GENERIC: 'Something went wrong. Please try again later.',
   FAILED_AUTH: 'Authentication failed!',
