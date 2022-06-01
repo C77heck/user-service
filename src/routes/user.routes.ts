@@ -1,96 +1,56 @@
-import Mongoose from 'mongoose';
-import mongoose, { Document } from 'mongoose';
-import uniqueValidator from 'mongoose-unique-validator';
+import express from 'express';
+import { body, check } from 'express-validator';
+import { deleteAccount, getJobSeekers, getRecruiters, getSecurityQuestion, getUserData, login, signup, updateUserData, whoami } from '../controllers/user.controller';
+import { auth } from '../middlewares/check.auth';
 
-const Schema = mongoose.Schema;
+const router = express.Router();
 
-export interface UserDocument extends Document {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  securityQuestion: string;
-  securityAnswer: string;
-  isRecruiter: boolean;
-  status: {
-    loginAttempts: number;
-    isBlocked: boolean;
-  };
-  description?: string,
-  // TODO -> we will need an attachment service for this. CDN setup
-  logo?: string,
-  meta?: string,
-  images?: string[];
-  resume?: string;
-}
+router.post('/login', [
+  check('email').not().isEmpty().escape().trim(),
+  check('password').not().isEmpty()
+], login);
 
-const userSchema = new Schema({
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required: true, minlength: 6 },
-  securityQuestion: { type: String, required: true },
-  securityAnswer: { type: String, required: true },
-  status: {
-    loginAttempts: { type: Number, required: false, default: 0 },
-    isBlocked: { type: Boolean, required: false, default: false }
-  },
-  isRecruiter: { type: Boolean, required: true },
-  description: { type: String },
-  logo: { type: String },
-  meta: { type: String },
-  images: [{ type: String }],
-  resume: { type: String },
-});
+router.post('/signup', [
+  body('*').trim().escape(),
+  check('first_name').not().isEmpty(),
+  check('last_name').not().isEmpty(),
+  check('email').normalizeEmail().isEmail(),
+  check('password').isLength({ min: 6 }),
+  check('securityQuestion').not().isEmpty().escape(),
+  check('securityAnswer').isLength({ min: 4 }),
+  check('isRecruiter').isBoolean(),
+  check('description').escape(),
+  check('meta').escape(),
+  check('images').escape(), // TODO -> we will need a cdn microservice here to return a string url
+  check('resume').escape(),
+], signup);
 
-userSchema.set('timestamps', true);
+router.use(auth);
 
-userSchema.plugin(uniqueValidator);
+router.get('/whoami/:userId', [], whoami);
 
-interface UserModel extends Mongoose.Model<any> {
-  getRecruiters(this: Mongoose.Model<any>): Promise<UserDocument[]>;
+router.get('/get-recruiters', [], getRecruiters);
 
-  getJobSeekers(this: Mongoose.Model<any>): Promise<UserDocument[]>;
+router.get('/get-user-data/:userId', [], getUserData);
 
-  loginAttempts(this: Mongoose.Model<any>, id: string, num: number): Promise<number>;
+router.get('/get-security-question/:userId', [], getSecurityQuestion);
 
-  getUserSecurityQuestion(this: Mongoose.Model<any>, userId: string): Promise<string>;
+router.put('/update/:userId', [
+  body('*').trim().escape(),
+  check('first_name').not().isEmpty(),
+  check('last_name').not().isEmpty(),
+  check('description').escape(),
+  check('meta').escape(),
+  check('images').escape(), // TODO -> we will need a cdn microservice here to return a string url
+  check('resume').escape(),
+], updateUserData);
 
-  deleteUser(this: Mongoose.Model<any>, userId: string): Promise<boolean>;
+router.delete('/delete-account/:userId', [
+  check('answer').not().isEmpty(),
+], deleteAccount);
 
-  updateUser(this: Mongoose.Model<any>, userData: UserDocument, userId: string): Promise<any>;
+// router.use(recruiterAuth);
 
-  getUser(this: Mongoose.Model<any>, userId: string): Promise<UserDocument>;
-}
+router.get('/get-job-seekers', [], getJobSeekers);
 
-userSchema.static('getRecruiters', async function (this: Mongoose.Model<any>): Promise<UserDocument[]> {
-  return await this.find({ isRecruiter: true });
-});
-
-userSchema.static('getJobSeekers', async function (this: Mongoose.Model<any>): Promise<UserDocument[]> {
-  return await this.find({ isRecruiter: false });
-});
-
-userSchema.static('loginAttempts', async function (this: Mongoose.Model<any>, id: string, num: number): Promise<any> {
-  return await this.updateOne({ _id: id }, { status: { loginAttempts: num } });
-});
-
-userSchema.static('getUserSecurityQuestion', async function (this: Mongoose.Model<any>, userId: string): Promise<string> {
-  return (await this.findOne({ _id: userId }))?.securityQuestion;
-});
-
-userSchema.static('deleteUser', async function (this: Mongoose.Model<any>, userId: string): Promise<boolean> {
-  const response = await this.deleteOne({ _id: userId });
-
-  return !!response?.acknowledged;
-});
-
-userSchema.static('updateUser', async function (this: Mongoose.Model<any>, userData: UserDocument, userId: string): Promise<any> {
-  return await this.updateOne({ _id: userId }, { ...userData });
-});
-
-userSchema.static('getUser', async function (this: Mongoose.Model<any>, userId: string): Promise<any> {
-  return await this.findOne({ _id: userId });
-});
-
-export default mongoose.model<UserDocument, UserModel>('User', userSchema);
+export default router;

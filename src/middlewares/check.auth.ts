@@ -1,12 +1,11 @@
 import express from 'express';
 import { NextFunction } from 'express/ts4.0';
+import jwt from 'jsonwebtoken';
 import { ERROR_MESSAGES } from '../libs/constants';
-
-const jwt = require('jsonwebtoken');
 
 const HttpError = require('../models/http-error');
 
-module.exports = (req: any, res: express.Response, next: NextFunction) => {
+export const auth = (req: any, res: express.Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
     return next();
   }
@@ -18,7 +17,7 @@ module.exports = (req: any, res: express.Response, next: NextFunction) => {
       throw new Error(ERROR_MESSAGES.FAILED_AUTH);
     }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+    const decodedToken: any = jwt.verify(token, process?.env?.JWT_KEY || '');
     req.userData = { userId: decodedToken.userId };
     next();
 
