@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, check } from 'express-validator';
+import { auth } from '../controllers/auth.controller';
 import { deleteAccount, getJobSeekers, getRecruiters, getSecurityQuestion, getUserData, login, signup, updateUserData, whoami } from '../controllers/user.controller';
-import { auth } from '../middlewares/check.auth';
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.post('/signup', [
   check('resume').escape(),
 ], signup);
 
-router.use(auth);
+router.get('/authenticate', auth);
 
 router.get('/whoami/:userId', [], whoami);
 
@@ -48,8 +48,6 @@ router.put('/update/:userId', [
 router.delete('/delete-account/:userId', [
   check('answer').not().isEmpty(),
 ], deleteAccount);
-
-// router.use(recruiterAuth);
 
 router.get('/get-job-seekers', [], getJobSeekers);
 

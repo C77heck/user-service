@@ -6,10 +6,6 @@ import { ERROR_MESSAGES } from '../libs/constants';
 const HttpError = require('../models/http-error');
 
 export const auth = (req: any, res: express.Response, next: NextFunction) => {
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
-
   try {
     const token = (req as any).headers.authorization.split(' ')[1];
 
@@ -19,9 +15,11 @@ export const auth = (req: any, res: express.Response, next: NextFunction) => {
 
     const decodedToken: any = jwt.verify(token, process?.env?.JWT_KEY || '');
     req.userData = { userId: decodedToken.userId };
-    next();
 
+    res.status(200);
   } catch (err) {
+    res.status(401);
+
     return next(new HttpError(
       ERROR_MESSAGES.FAILED_AUTH,
       401
