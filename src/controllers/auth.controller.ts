@@ -2,8 +2,7 @@ import express from 'express';
 import { NextFunction } from 'express/ts4.0';
 import jwt from 'jsonwebtoken';
 import { ERROR_MESSAGES } from '../libs/constants';
-
-const HttpError = require('../models/http-error');
+import { HttpError } from '../models/http.error';
 
 export const auth = (req: any, res: express.Response, next: NextFunction) => {
   try {

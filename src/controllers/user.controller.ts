@@ -59,7 +59,7 @@ export const login = async (req: any, res: any, next: NextFunction) => {
   try {
     isValidPassword = await bcrypt.compare(password, existingUser.password);
   } catch (err) {
-    Users.loginAttempts(existingUser._id, existingUser.status.loginAttempts + 1);
+    await Users.loginAttempts(existingUser._id, existingUser.status.loginAttempts + 1);
 
     return next(new HttpError(
       'Could not log you in, please check your credentials and try again',
@@ -69,7 +69,7 @@ export const login = async (req: any, res: any, next: NextFunction) => {
 
   try {
     if (!isValidPassword) {
-      Users.loginAttempts(existingUser._id, existingUser.status.loginAttempts + 1);
+      await Users.loginAttempts(existingUser._id, existingUser.status.loginAttempts + 1);
 
       return next(new HttpError(
         'Could not log you in, please check your credentials and try again',
@@ -105,6 +105,7 @@ export const login = async (req: any, res: any, next: NextFunction) => {
 };
 
 export const signup = async (req: any, res: any, next: NextFunction) => {
+  console.log('WE ARE HITTING IT');
   handleError(req, next);
   const { email, password } = req.body;
 
