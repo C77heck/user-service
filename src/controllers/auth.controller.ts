@@ -5,18 +5,17 @@ import { ERROR_MESSAGES } from '../libs/constants';
 
 export const authenticate = (req: any, res: express.Response, next: NextFunction) => {
   try {
-    const token = (req as any)?.headers?.authorization.split(' ')[1];
+    const token = req.headers.bearer;
 
     if (!token) {
       throw new Error(ERROR_MESSAGES.FAILED_AUTH);
     }
 
-    const decodedToken: any = jwt.verify(token, process?.env?.JWT_KEY || '');
-    req.userData = { userId: decodedToken.userId };
-    console.log('AUTHENTICATE', req.userData, decodedToken);
+    jwt.verify(token, process?.env?.JWT_KEY || '');
 
     res.status(200).end();
   } catch (err) {
+    console.log({ err });
     res.status(401).end();
   }
 };
