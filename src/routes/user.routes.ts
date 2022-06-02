@@ -1,9 +1,11 @@
 import express from 'express';
 import { body, check } from 'express-validator';
-import { auth } from '../controllers/auth.controller';
+import { authenticate } from '../controllers/auth.controller';
 import { deleteAccount, getJobSeekers, getRecruiters, getSecurityQuestion, getUserData, login, signup, updateUserData, whoami } from '../controllers/user.controller';
 
 const router = express.Router();
+
+router.get('/authenticate', [], authenticate);
 
 router.post('/login', [
   check('email').not().isEmpty().escape().trim(),
@@ -24,8 +26,6 @@ router.post('/signup', [
   check('images').escape(), // TODO -> we will need a cdn microservice here to return a string url
   check('resume').escape(),
 ], signup);
-
-router.get('/authenticate', auth);
 
 router.get('/whoami/:userId', [], whoami);
 

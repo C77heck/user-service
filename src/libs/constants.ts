@@ -9,6 +9,7 @@ export const ERROR_MESSAGES = {
   INVALID_MIME: 'Invalid mime type!',
   INVALID_INPUT_DATA: 'Invalid inputs passed, please check your data',
   FILE_UPLOAD_FAILED: 'File upload failed',
+  INCORRECT_ROUTE: 'Could not find this route.',
 };
 
 export const MESSAGES = {
